@@ -1,0 +1,63 @@
+.splash-screen {
+    position:fixed;
+    width: 100vw;
+    height: 100vh;
+    color: black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    background-color:rgb(210, 210, 210);
+    z-index: 1000;
+  }
+  
+  .logo {
+    width: 550px;
+    height: auto;
+  }
+  .fonty{
+    font-size: 70px;
+    font-family: "Bungee Tint", sans-serif;
+    animation: gameTitleEffect 3s ease-in-out forwards;
+    text-shadow: 0 0 10px #ff0, 0 0 20px #ff9900, 0 0 30px #ff0000; /* Neon glow effect */
+
+  
+
+ 
+ 
+   
+
+  }
+  .developer{
+    font-size: 15px;
+    font-family: "Bangers", system-ui;
+  }
+  
+  @keyframes fadeIn {
+    0% 
+    { opacity: 0; }
+    100% { opacity: 1; }
+  }
+
+  @keyframes gameTitleEffect {
+    0% {
+      opacity: 0;
+      transform: scale(0.8);
+      letter-spacing: 0.5rem;
+      text-shadow: 0 0 5px #ff0, 0 0 10px #ff9900;
+    }
+    50% {
+      opacity: 0.7;
+      transform: scale(1.2);
+      letter-spacing: 0.8rem;
+      text-shadow: 0 0 20px #ff9900, 0 0 30px #ff0000;
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+      letter-spacing: 1rem;
+      text-shadow: 0 0 30px #ff0000,0 0 10px #ff9900,  0 0 5px #ff0;
+    }
+  }
+  
+  
