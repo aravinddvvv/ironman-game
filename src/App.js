@@ -3,7 +3,8 @@ import { useEffect, useState } from "react";
 import Button from 'react-bootstrap/Button';
 import SplashScreen from './Splashscreen';
 import useSound from 'use-sound';
-import intro from './audio/ironman.mp3'; // Import the SplashScreen component
+import intro from './audio/ironman.mp3'; // Import background music
+import gameoverSound from './audio/polayadi-mone.mp3'; // Import game-over sound
 
 const BIRD_HEIGHT = 73;
 const BIRD_WIDTH = 103;
@@ -15,6 +16,10 @@ const OBJ_WIDTH = 7;
 const OBJ_SPEED = 6;
 const OBJ_GAP = 200;
 
+// Bird GIFs
+const IRONMAN_GIF = "./images/irony-unscreen.gif";
+const GAMEOVER_GIF = "./images/gosty.gif";  // New GIF when game is over
+
 function App() {
   // States for splash screen and game
   const [isLoaded, setIsLoaded] = useState(false); // For Splash Screen
@@ -25,29 +30,44 @@ function App() {
   const [score, setScore] = useState(0);
   const [isGameOver, setIsGameOver] = useState(false);
 
-  // Splash Screen Timeout
-  const [play] = useSound(intro);
-  useEffect(() => {
+  // Bird GIF state
+  const [birdGif, setBirdGif] = useState(IRONMAN_GIF);  // Default GIF for Ironman
 
+  // Splash Screen Timeout and Sounds
+  const [playIntro, { stop: stopIntro }] = useSound(intro, { loop: true });
+  const [playGameOver] = useSound(gameoverSound);
+
+  useEffect(() => {
     const timer = setTimeout(() => {
       setIsLoaded(true);
-      play()
-    }, 14500); // Show splash screen for 3 seconds
+      playIntro();
+    }, 14500); // Show splash screen for 14.5 seconds
     return () => clearTimeout(timer);
-  }, [play]);
+  }, [playIntro]);
 
   // Game Over handler
   const handleGameOver = () => {
     setIsStart(false);
     setIsGameOver(true);
+    setBirdGif(GAMEOVER_GIF);  // Change to Game Over GIF
     setBirspos(300);
     setScore(0);
+    
+    // Stop the intro/background music and play the game-over sound
+    stopIntro(); 
+    playGameOver();
   };
 
   // Restart handler
   const handleRestart = () => {
     setIsGameOver(false);
     setIsStart(true);
+    setBirdGif(IRONMAN_GIF);  // Reset back to Ironman GIF
+    
+    // Restart the background music after a short delay
+    setTimeout(() => {
+      playIntro();
+    }, 500); // Delay is optional
   };
 
   // Collision detection
@@ -87,16 +107,6 @@ function App() {
     }
   }, [isStart, objPos]);
 
-  // Collision detection re-run
-  useEffect(() => {
-    let topObj = birdpos >= 0 && birdpos < objHeight;
-    let bottomObj = birdpos <= WALL_HEIGHT && birdpos >= WALL_HEIGHT - (WALL_HEIGHT - OBJ_GAP - objHeight) - BIRD_HEIGHT;
-
-    if (objPos >= OBJ_WIDTH && objPos <= OBJ_WIDTH + 30 && (topObj || bottomObj)) {
-      handleGameOver();
-    }
-  }, [isStart, birdpos, objHeight, objPos]);
-
   // Bird control handler
   const handler = () => {
     if (!isStart) setIsStart(true);
@@ -132,7 +142,7 @@ function App() {
               </GameOverMessage>
             )}
             <Obj height={objHeight} width={OBJ_WIDTH} left={objPos} top={0} deg={180} />
-            <Bird height={BIRD_HEIGHT} width={BIRD_WIDTH} top={birdpos} left={100} />
+            <Bird height={BIRD_HEIGHT} width={BIRD_WIDTH} top={birdpos} left={100} gif={birdGif} />
             <Obj height={WALL_HEIGHT - OBJ_GAP - objHeight} width={OBJ_WIDTH} left={objPos} top={WALL_HEIGHT - (objHeight + (WALL_HEIGHT - OBJ_GAP - objHeight))} deg={0} />
           </Background>
         </Home>
@@ -141,7 +151,9 @@ function App() {
   );
 }
 
-export default App;
+export default App;  // Correct default export
+
+// Styled components remain the same
 
 const Home = styled.div`
   height: 100vh;
@@ -163,7 +175,7 @@ const Background = styled.div`
 
 const Bird = styled.div`
   position: absolute;
-  background-image: url("./images/irony-unscreen.gif");
+  background-image: url(${(props) => props.gif});  // Use the gif prop to determine which GIF to show
   background-repeat: no-repeat;
   background-size: ${(props) => props.width}px ${(props) => props.height}px;
   width: ${(props) => props.width}px;
