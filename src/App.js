@@ -1,10 +1,11 @@
 import styled from "styled-components";
+import styledd, { keyframes } from "styled-components";
 import { useEffect, useState } from "react";
 import Button from 'react-bootstrap/Button';
 import SplashScreen from './Splashscreen';
 import useSound from 'use-sound';
 import intro from './audio/ironman.mp3'; // Import background music
-import gameoverSound from './audio/polayadi-mone.mp3'; // Import game-over sound
+import gameoverSound from './audio/gameover.mp3'; // Import game-over sound
 
 const BIRD_HEIGHT = 73;
 const BIRD_WIDTH = 103;
@@ -29,6 +30,9 @@ function App() {
   const [objPos, setObjPos] = useState(WALL_WIDTH);
   const [score, setScore] = useState(0);
   const [isGameOver, setIsGameOver] = useState(false);
+  const [level, setLevel] = useState(1); // New state to track level
+  const [showLevel, setShowLevel] = useState(false); // State to toggle level display
+
 
   // Bird GIF state
   const [birdGif, setBirdGif] = useState(IRONMAN_GIF);  // Default GIF for Ironman
@@ -45,6 +49,15 @@ function App() {
     return () => clearTimeout(timer);
   }, [playIntro]);
 
+   // Level Up logic based on score
+   useEffect(() => {
+    if (score % 20 === 0 && score > 0) {
+      setLevel((prevLevel) => prevLevel + 1); // Increment level
+      setShowLevel(true); // Show level message
+      setTimeout(() => setShowLevel(false), 2000); // Hide after 2 seconds
+    }
+  }, [score]);
+
   // Game Over handler
   const handleGameOver = () => {
     setIsStart(false);
@@ -52,6 +65,7 @@ function App() {
     setBirdGif(GAMEOVER_GIF);  // Change to Game Over GIF
     setBirspos(300);
     setScore(0);
+    setLevel(1);  // Reset level on game over
     
     // Stop the intro/background music and play the game-over sound
     stopIntro(); 
@@ -62,12 +76,15 @@ function App() {
   const handleRestart = () => {
     setIsGameOver(false);
     setIsStart(true);
-    setBirdGif(IRONMAN_GIF);  // Reset back to Ironman GIF
+    setBirdGif(IRONMAN_GIF);
+    setScore(0);  // Reset score
+    setLevel(1); 
+      // Reset back to Ironman GIF
     
     // Restart the background music after a short delay
     setTimeout(() => {
       playIntro();
-    }, 500); // Delay is optional
+    }, 200); // Delay is optional
   };
 
   // Collision detection
@@ -130,6 +147,8 @@ function App() {
             </span>
           </center>
           <Background height={WALL_HEIGHT} width={WALL_WIDTH}>
+             {/* Display Level Animation */}
+             {showLevel && <LevelDisplay>Level {level}</LevelDisplay>}
             {!isStart && !isGameOver ? <Startboard>Click To Start</Startboard> : null}
             {isGameOver && (
               <GameOverMessage>
@@ -151,9 +170,8 @@ function App() {
   );
 }
 
-export default App;  // Correct default export
+export default App;  
 
-// Styled components remain the same
 
 const Home = styled.div`
   height: 100vh;
@@ -173,9 +191,23 @@ const Background = styled.div`
   border: 15px solid black;
 `;
 
+const LevelDisplay = styled.div`
+  position: absolute;
+  top: 30%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 40px;
+  font-weight: bold;
+  color: yellow;
+  background-color: black;
+  padding: 10px 20px;
+  border-radius: 10px;
+  animation: fadeInOut 2s ease-in-out;
+`;
+
 const Bird = styled.div`
   position: absolute;
-  background-image: url(${(props) => props.gif});  // Use the gif prop to determine which GIF to show
+  background-image: url(${(props) => props.gif});  
   background-repeat: no-repeat;
   background-size: ${(props) => props.width}px ${(props) => props.height}px;
   width: ${(props) => props.width}px;
@@ -210,6 +242,12 @@ const Startboard = styled.div`
   font-family: cursive;
   border: 7px solid black;
 `;
+
+const fadeInOut = keyframes`
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+`;
+
 
 const GameOverMessage = styled.div`
   position: absolute;
